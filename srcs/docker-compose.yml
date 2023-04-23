@@ -1,0 +1,71 @@
+
+version: "3.9"
+
+services:
+
+  mariadb:
+    container_name: mariadb
+    build:
+      context: ./requirements/mariadb
+    environment:
+      - DB_ROOT_PASSWD=${DB_ROOT_PASSWD:?err}
+      - DB_WP_USER=${WP_ADMIN_USER:?err}
+      - DB_WP_PASSWD=${WP_ADMIN_PASSWD:?err}
+    volumes:
+      - database:/data
+    networks:
+      - inception
+
+  wordpress:
+    container_name: wordpress
+    build:
+      context: ./requirements/wordpress
+    environment:
+      - DB_WP_USER=${WP_ADMIN_USER:?err}
+      - DB_WP_PASSWD=${WP_ADMIN_PASSWD:?err}
+      - WP_ADMIN_USER=${WP_ADMIN_USER:?err} 
+      - WP_ADMIN_PASSWD=${WP_ADMIN_PASSWD:?err} 
+      - WP_USER_NAME=${WP_USER_NAME:?err} 
+      - WP_USER_PASSWD=${WP_USER_PASSWD:?err} 
+    volumes:
+      - wordpress:/wordpress
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./requirements/nginx
+    volumes:
+      - wordpress:/wordpress
+    networks:
+      - inception
+    ports:
+      - "8080:443"
+    depends_on:
+      - wordpress
+
+volumes:
+  database:
+    name: database 
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/tmp/inception/database'
+
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/tmp/inception/wordpress'
+
+networks:
+  inception:
+    name: inception
+
+

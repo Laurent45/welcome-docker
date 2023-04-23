@@ -1,0 +1,16 @@
+
+[mysqld]
+
+user=mysql
+
+datadir=/data
+
+bind-address=0.0.0.0
+
+skip-networking=0
+
+[mysql_install_db]
+
+auth-root-authentication-method=normal
+
+skip-test-db

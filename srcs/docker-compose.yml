@@ -5,8 +5,8 @@ services:
 
   mariadb:
     container_name: mariadb
-    build:
-      context: ./requirements/mariadb
+    build: ./requirements/mariadb
+    image: mariadb:inception
     environment:
       - DB_ROOT_PASSWD=${DB_ROOT_PASSWD:?err}
       - DB_WP_USER=${WP_ADMIN_USER:?err}
@@ -15,11 +15,16 @@ services:
       - database:/data
     networks:
       - inception
+    healthcheck:
+      test: echo "It's ok Wordpress I'm ready"
+      interval: 1s
+      retries: 10
+    restart: on-failure:3
 
   wordpress:
     container_name: wordpress
-    build:
-      context: ./requirements/wordpress
+    build: ./requirements/wordpress
+    image: wordpress:inception
     environment:
       - DB_WP_USER=${WP_ADMIN_USER:?err}
       - DB_WP_PASSWD=${WP_ADMIN_PASSWD:?err}
@@ -32,12 +37,14 @@ services:
     networks:
       - inception
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
+    restart: on-failure:3
 
   nginx:
     container_name: nginx
-    build:
-      context: ./requirements/nginx
+    build: ./requirements/nginx
+    image: nginx:inception
     volumes:
       - wordpress:/wordpress
     networks:
@@ -46,15 +53,17 @@ services:
       - "8080:443"
     depends_on:
       - wordpress
+    restart: on-failure:3
 
 volumes:
+
   database:
     name: database 
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/tmp/inception/database'
+      device: '/home/lfrederi/data/database'
 
   wordpress:
     name: wordpress
@@ -62,7 +71,7 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/tmp/inception/wordpress'
+      device: '/home/lfrederi/data/wordpress'
 
 networks:
   inception:

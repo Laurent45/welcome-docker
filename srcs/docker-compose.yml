@@ -59,21 +59,12 @@ volumes:
 
   database:
     name: database 
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/lfrederi/data/database'
 
   wordpress:
     name: wordpress
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/lfrederi/data/wordpress'
 
 networks:
+
   inception:
     name: inception
 
